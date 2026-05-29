@@ -105,18 +105,12 @@ pub async fn handle(cmd: super::ModelCommand, cfg: &Config) -> Result<(), String
                     cfg.hf_model_repo_prefix.as_str()
                 }
             );
-            println!("  {:<10} {:<6} {:<8} 说明", "名称", "大小", "状态");
-            println!("  {:-<10} {:-<6} {:-<8} ----", "", "", "");
+            println!("  {:<9} {:>6}  状态      说明", "名称", "大小");
+            println!("  {:-<9} {:->6}  --------  ----", "", "");
             for model in MODELS {
-                let installed = is_model_installed(&models_dir, model.name);
-                let status = if installed {
-                    "✓ 已下载"
-                } else {
-                    "未下载"
-                };
                 println!(
-                    "  {:<10} {:<6} {:<8} {}",
-                    model.name, model.size, status, model.description
+                    "{}",
+                    format_list_row(model, is_model_installed(&models_dir, model.name))
                 );
             }
             println!("\n使用 `subforge model download <名称>` 下载模型");
@@ -172,15 +166,9 @@ pub fn is_model_installed(models_dir: &Path, name: &str) -> bool {
 fn prompt_model_choice(models: &[WhisperModel], models_dir: &Path) -> Result<String, String> {
     println!("请选择要下载的模型:\n");
     for (i, model) in models.iter().enumerate() {
-        let installed = is_model_installed(models_dir, model.name);
-        let mark = if installed { " ✓ 已下载" } else { "" };
         println!(
-            "  {} - {:<9} {:<6} {}{}",
-            i + 1,
-            model.name,
-            model.size,
-            model.description,
-            mark
+            "{}",
+            format_choice_row(i + 1, model, is_model_installed(models_dir, model.name))
         );
     }
     println!();
@@ -291,6 +279,35 @@ snapshot_download(repo_id=sys.argv[1], local_dir=sys.argv[2])
     Ok(())
 }
 
+fn status_label(installed: bool) -> &'static str {
+    if installed {
+        "✓ 已下载"
+    } else {
+        "  未下载"
+    }
+}
+
+fn format_list_row(model: &WhisperModel, installed: bool) -> String {
+    format!(
+        "  {:<9} {:>6}  {}  {}",
+        model.name,
+        model.size,
+        status_label(installed),
+        model.description
+    )
+}
+
+fn format_choice_row(index: usize, model: &WhisperModel, installed: bool) -> String {
+    format!(
+        "  {:>2}. {:<9} {:>6}  {}  {}",
+        index,
+        model.name,
+        model.size,
+        status_label(installed),
+        model.description
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -354,5 +371,23 @@ mod tests {
     fn parse_model_choice_rejects_invalid_input() {
         assert!(parse_model_choice("999", MODELS).is_err());
         assert!(parse_model_choice("unknown", MODELS).is_err());
+    }
+
+    #[test]
+    fn choice_rows_have_aligned_columns() {
+        let row = format_choice_row(
+            10,
+            &WhisperModel {
+                name: "turbo",
+                size: "809M",
+                repo_suffix: "x",
+                description: "速度和质量折中，适合 GPU",
+            },
+            true,
+        );
+        assert_eq!(
+            row,
+            "  10. turbo       809M  ✓ 已下载  速度和质量折中，适合 GPU"
+        );
     }
 }
