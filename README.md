@@ -1,4 +1,4 @@
-# SUBFORGE
+# subforge
 
 Rust CLI 视频字幕处理工具：转录 → 智能分段 → 翻译 → 质量评估 → 烧制 / 软封装。
 
@@ -35,8 +35,8 @@ cargo --version
 ### 2. 获取源码并编译二进制
 
 ```bash
-git clone https://github.com/deusjin/SUBFORGE.git
-cd SUBFORGE
+git clone https://github.com/deusjin/subforge.git
+cd subforge
 cargo install --path .
 ```
 
