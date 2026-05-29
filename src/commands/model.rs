@@ -110,9 +110,9 @@ pub async fn handle(cmd: super::ModelCommand, cfg: &Config) -> Result<(), String
             for model in MODELS {
                 let installed = is_model_installed(&models_dir, model.name);
                 let status = if installed {
-                    "✓ 已安装"
+                    "✓ 已下载"
                 } else {
-                    "未安装"
+                    "未下载"
                 };
                 println!(
                     "  {:<10} {:<6} {:<8} {}",
@@ -173,7 +173,7 @@ fn prompt_model_choice(models: &[WhisperModel], models_dir: &Path) -> Result<Str
     println!("请选择要下载的模型:\n");
     for (i, model) in models.iter().enumerate() {
         let installed = is_model_installed(models_dir, model.name);
-        let mark = if installed { " ✓" } else { "" };
+        let mark = if installed { " ✓ 已下载" } else { "" };
         println!(
             "  {} - {:<9} {:<6} {}{}",
             i + 1,
@@ -219,7 +219,7 @@ pub async fn download_model(cfg: &Config, name: &str) -> Result<(), String> {
     let models_dir = cfg.models_dir().join("faster-whisper");
     let dest = model_dir(&models_dir, name);
     if is_model_installed(&models_dir, name) {
-        println!("模型 {name} 已存在于 {}", dest.display());
+        println!("模型 {name} 已下载，跳过下载: {}", dest.display());
         return Ok(());
     }
 
