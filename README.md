@@ -10,7 +10,7 @@ Rust CLI 视频字幕处理工具：转录 → 智能分段 → 翻译 → 质�
 
 ## 安装
 
-支持 Linux / macOS / Windows。`subforge` 本体是 Rust CLI；如果没有下载预编译的 `subforge` / `subforge.exe`，从源码安装前必须先安装 Rust 工具链。Python 依赖由 `subforge setup` 负责安装。
+支持 Linux / macOS / Windows。`subforge` 本体是 Rust CLI；任何平台如果没有下载预编译的 `subforge` / `subforge.exe`，从源码安装前都必须先安装 Rust 工具链。Python 依赖由 `subforge setup` 负责安装。
 
 ### 1. 安装前置工具
 
@@ -27,7 +27,10 @@ rustup update
 cargo --version
 ```
 
-Windows PowerShell 如果提示找不到 `cargo`，关闭并重新打开终端；仍不行就检查 `$env:USERPROFILE\.cargo\bin` 是否在 PATH 中。
+如果提示找不到 `cargo`，关闭并重新打开终端。仍不行就检查 Cargo bin 目录是否在 PATH 中：
+
+- Linux / macOS: `$HOME/.cargo/bin`
+- Windows PowerShell: `$env:USERPROFILE\.cargo\bin`
 
 ### 2. 获取源码并编译二进制
 
@@ -43,7 +46,7 @@ cargo install --path .
 subforge --version
 ```
 
-如果 Windows 不想安装 Rust，需要先提供/下载预编译的 `subforge.exe`，把它所在目录加入 PATH；之后仍然需要执行下面的 `ffmpeg`、`config.toml` 和 `subforge setup` 步骤。
+如果不想安装 Rust，需要先提供/下载对应平台的预编译二进制（Linux/macOS 为 `subforge`，Windows 为 `subforge.exe`），把它所在目录加入 PATH；之后仍然需要执行下面的 `ffmpeg`、`config.toml` 和 `subforge setup` 步骤。
 
 ### 3. 系统依赖：ffmpeg
 
@@ -438,7 +441,7 @@ cargo clippy --all-targets       # lint
 
 | 症状 | 原因 / 解决 |
 |------|-------------|
-| `cargo` / `rustup` not found | 没安装 Rust 工具链，或 PATH 未刷新。按[安装前置工具](#1-安装前置工具)安装后重新打开终端。 |
+| `cargo` / `rustup` not found | 当前系统没安装 Rust 工具链，或 PATH 未刷新。按[安装前置工具](#1-安装前置工具)安装后重新打开终端；Linux/macOS 检查 `$HOME/.cargo/bin`，Windows 检查 `$env:USERPROFILE\.cargo\bin`。 |
 | Windows 编译时报 linker / `link.exe` 错误 | Rust MSVC 工具链缺 Visual Studio Build Tools。运行 `winget install Microsoft.VisualStudio.2022.BuildTools`，安装 C++ build tools 后重试。 |
 | `ffmpeg not found` | 未安装 ffmpeg。按错误提示或上面[系统依赖](#3-系统依赖ffmpeg)章节安装；`subforge doctor` 会打印对应平台命令。 |
 | `python not found` / 缺 faster-whisper 等包 | 没建 venv 或依赖没装齐。运行 `subforge setup`（GPU 加 `--compute cu124`）。 |
