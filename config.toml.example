@@ -1,0 +1,90 @@
+# ============================================================
+# SUBFORGE Configuration — EXAMPLE
+#
+# Copy this file to `config.toml` and fill in your own values.
+# `config.toml` is gitignored; never commit it.
+#
+# Modify with: subforge config set <key> <value>
+# Inspect with: subforge config show
+# ============================================================
+
+# --- ASR / 语音转录 ---
+asr                  = "faster-whisper"   # bijian / faster-whisper / whisper-api / whisper-cpp
+whisper_model        = "small.en"         # tiny / base / small / medium / large / turbo (.en 仅英语)
+whisper_language     = ""                 # 留空自动检测，或 en / zh / ja / ko ...
+whisper_device       = "auto"             # auto / cuda / cpu；auto 会在可见 CUDA 设备中自动选择
+cuda_gpu             = ""                 # 默认 CUDA GPU 编号；供 faster-whisper/NVENC 使用。留空时多 GPU 会提示选择；可用 subforge gpu 设置
+whisper_compute_type = "auto"             # auto / float16 / float32 / int8 / int8_float16
+whisper_api_model    = "whisper-1"        # whisper-api 后端模型名
+whisper_cpp_model    = "models/ggml-base.bin"
+
+# --- 字幕分段 (SaT, EMNLP 2024) ---
+segmenter            = "sat"
+max_chars_per_cue    = 100
+target_chars_per_cue = 60
+restore_punctuation  = false
+polish_with_llm      = false              # LLM 边界润色 (额外 API 调用)
+chained_translation  = true               # true=顺序翻译 / false=并发(滑动窗口缓存)
+
+# --- 字幕样式 ---
+layout               = "target-above"     # target-above（译文在上）/ source-above / target-only / source-only
+target_color         = ""                 # 译文行颜色 RRGGBB hex（如 FFFF00 黄色），留空 = libass 默认
+source_color         = ""                 # 原文行颜色 RRGGBB hex，留空 = libass 默认
+
+# --- 翻译 ---
+translator           = "google"           # llm / google / bing / "" (不翻译)
+target_language      = "zh-Hans"
+thread_num           = 3
+batch_size           = 7
+
+# --- LLM 提供商（主翻译 + 默认润色/QE/refine） ---
+# 环境变量 OPENAI_API_KEY / OPENAI_BASE_URL 优先级最高。
+api_key              = ""
+base_url             = ""                 # 如 https://api.openai.com/v1
+model                = "gpt-4o-mini"
+
+# --- 可选：分别为 ASR / QE / polish 指定不同的 LLM 端点 ---
+# 留空时回退到上面的 api_key/base_url/model。
+asr_api_key          = ""
+asr_base_url         = ""
+qe_api_key           = ""
+qe_base_url          = ""
+polish_api_key       = ""
+polish_base_url      = ""
+polish_model         = ""
+
+# --- 翻译质量 (MAPS + GEMBA-MQM + Targeted Refine) ---
+quality_estimation   = true
+qe_model             = ""                 # 留空则用主 model
+refine               = true
+refine_threshold     = 70
+
+# --- 其他 ---
+data_dir             = ".subforge"
+tm_dir               = ""                 # 留空：与原视频同目录的 .subforge-tm/
+bijian_base_url      = "https://member.bilibili.com/x/bcut/rubick-interface"
+
+# 自定义 faster-whisper 模型仓库（默认 Systran/faster-whisper-*）。
+# 留空使用内置 MODELS 列表。需要镜像或 fork 时设置，例如 BAAI/...
+hf_model_repo_prefix = ""
+
+# ============================================================
+# 字幕烧制 / 软封装默认值
+# ============================================================
+# CLI flag (subforge synthesize / process) 优先于这里的值。
+# 数值字段 0 = 未设置，使用编码器/libass 默认。
+# 字符串字段空 = 未设置。
+
+synth_mode           = ""                 # hard / soft / both（留空 = hard；soft 默认输出 .mkv/SRT）
+synth_font           = ""                 # "Source Han Sans" / "Microsoft YaHei" 等
+synth_font_size      = 0                  # 像素；0 = libass 默认
+synth_font_color     = ""                 # RRGGBB hex（如 FFFFFF）
+synth_outline_color  = ""                 # RRGGBB hex（如 000000）
+synth_outline_width  = 0                  # 描边像素
+synth_position       = ""                 # bottom / top / center / bottom-right / top-left / ...
+synth_margin_v       = 0                  # 距画面边缘的垂直边距像素
+synth_encoder        = ""                 # x264 / x265 / nvenc / nvenc-hevc / qsv / videotoolbox
+synth_crf            = 0                  # 0-51 质量；0 = 编码器默认（x264=23, x265=28）
+synth_preset         = ""                 # veryfast / fast / medium / slow / veryslow
+synth_max_bitrate    = ""                 # 如 8M / 5000k；bufsize 自动设为 2 倍
+synth_width_ratio    = 0                  # 字幕占画面宽度的百分比 (1-100)；0 = libass 默认；推荐 90

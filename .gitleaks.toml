@@ -1,0 +1,28 @@
+# gitleaks rule set: catches generic API tokens without embedding any real
+# historical secret value in the repository.
+title = "subforge gitleaks"
+
+[[rules]]
+id = "openai-key"
+description = "OpenAI/OpenAI-compatible sk- key"
+regex = '''sk-[A-Za-z0-9._-]{20,}'''
+tags = ["key", "openai"]
+
+[[rules]]
+id = "config-api-key-assignment"
+description = "Non-empty API key assignment in config-like files"
+regex = '''(?i)api[_-]?key\s*=\s*["'][A-Za-z0-9._/+~=-]{16,}["']'''
+path = '''(^|/)(config|\.env)(\.|$)'''
+tags = ["key", "config"]
+
+[[rules]]
+id = "generic-bearer-token"
+description = "Bearer token"
+regex = '''Bearer\s+[A-Za-z0-9._/+~=-]{20,}'''
+tags = ["key", "bearer"]
+
+[[rules]]
+id = "generic-jwt"
+description = "Bearer JWT"
+regex = '''eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}'''
+tags = ["jwt"]

@@ -1,0 +1,32 @@
+# Build artifacts
+/target
+
+# User data: caches, models, Python venv, translation memory.
+# These are runtime state, not project source.
+.subforge/
+.subforge-tm/
+
+# User-local config (contains api_key). Distribute config.toml.example instead.
+/config.toml
+
+# Test media (large; never useful in repo).
+testvideos/
+*.mp4
+*.mkv
+*.mov
+*.webm
+
+# Subtitle outputs from running the tool. Kept ignored so users don't
+# accidentally commit translations of test files. Source SRTs that ARE
+# project artifacts can be force-added with `git add -f`.
+*.srt
+
+# Editor / OS noise
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Removed legacy names (kept transitionally so old worktrees stay clean)
+.vcnew/
+.vcnew-tm/
