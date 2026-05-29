@@ -10,20 +10,42 @@ Rust CLI 视频字幕处理工具：转录 → 智能分段 → 翻译 → 质�
 
 ## 安装
 
-支持 Linux / macOS / Windows。推荐用 `subforge setup` 一键安装 Python 环境。
+支持 Linux / macOS / Windows。`subforge` 本体是 Rust CLI；如果没有下载预编译的 `subforge` / `subforge.exe`，从源码安装前必须先安装 Rust 工具链。Python 依赖由 `subforge setup` 负责安装。
 
-### 1. 获取源码并编译二进制
+### 1. 安装前置工具
+
+| 工具 | 用途 | Linux / macOS | Windows |
+|------|------|---------------|---------|
+| Rust 1.88+ | 编译 `subforge` 本体 | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install Rustlang.Rustup`，或安装 rustup-init；按提示安装 MSVC Build Tools |
+| Python 3.9+ | faster-whisper / SaT / SubER 运行环境 | 系统包管理器或 python.org | `winget install Python.Python.3.12`，安装后确认 `python --version` 可用 |
+| ffmpeg | 抽音频、烧制/封装字幕 | 见下一节 | 见下一节 |
+
+安装 Rust 后先确认 `cargo` 可用：
 
 ```bash
-# 占位仓库地址，请替换为实际地址
-git clone https://github.com/deusjin/subforge.git
-cd subforge
+rustup update
+cargo --version
+```
+
+Windows PowerShell 如果提示找不到 `cargo`，关闭并重新打开终端；仍不行就检查 `$env:USERPROFILE\.cargo\bin` 是否在 PATH 中。
+
+### 2. 获取源码并编译二进制
+
+```bash
+git clone https://github.com/deusjin/SUBFORGE.git
+cd SUBFORGE
 cargo install --path .
 ```
 
-需要 Rust 1.88+（`rustup update`）。
+安装完成后确认：
 
-### 2. 系统依赖：ffmpeg
+```bash
+subforge --version
+```
+
+如果 Windows 不想安装 Rust，需要先提供/下载预编译的 `subforge.exe`，把它所在目录加入 PATH；之后仍然需要执行下面的 `ffmpeg`、`config.toml` 和 `subforge setup` 步骤。
+
+### 3. 系统依赖：ffmpeg
 
 ffmpeg 是核心依赖（抽音频 + 烧字幕），需单独安装：
 
@@ -37,7 +59,7 @@ winget install Gyan.FFmpeg         # Windows (或 choco/scoop install ffmpeg)
 
 > 没装也没关系：用到 ffmpeg 时会报错并打印上面的安装命令，`subforge doctor` 也会提示。
 
-### 3. 一键安装 Python 环境
+### 4. 一键安装 Python 环境
 
 `subforge setup` 会自动创建虚拟环境、升级 pip、安装全部管线依赖（faster-whisper、wtpsplit、transformers、huggingface_hub、subtitle-edit-rate）以及 PyTorch：
 
@@ -52,7 +74,7 @@ Windows / macOS / Linux 命令完全一致——venv 的 `bin/` vs `Scripts\` �
 
 > 前置：系统需有 Python 3.9+。缺失时 `setup` 会打印对应平台的安装命令。
 
-### 4. 复制配置模板
+### 5. 复制配置模板
 
 ```bash
 cp config.toml.example config.toml   # Linux/macOS
@@ -61,7 +83,7 @@ copy config.toml.example config.toml # Windows
 
 `config.toml` 已 gitignored（含 api_key），不要提交。
 
-### 5. 检查环境
+### 6. 检查环境
 
 ```bash
 subforge doctor
@@ -409,14 +431,16 @@ cargo clippy --all-targets       # lint
 ### 安全
 
 - `config.toml` 已加入 `.gitignore`，永远不要 commit。
-- CI 中启用了 `gitleaks` 扫描历史泄漏的 key。
+- CI 中启用了 `gitleaks` 扫描常见 API key / Bearer token / JWT。
 - 切换 key 不会失效缓存（key 只用于鉴权，不影响输出）。
 
 ## 常见问题排查 (Troubleshooting)
 
 | 症状 | 原因 / 解决 |
 |------|-------------|
-| `ffmpeg not found` | 未安装 ffmpeg。按错误提示或上面[系统依赖](#2-系统依赖ffmpeg)章节安装；`subforge doctor` 会打印对应平台命令。 |
+| `cargo` / `rustup` not found | 没安装 Rust 工具链，或 PATH 未刷新。按[安装前置工具](#1-安装前置工具)安装后重新打开终端。 |
+| Windows 编译时报 linker / `link.exe` 错误 | Rust MSVC 工具链缺 Visual Studio Build Tools。运行 `winget install Microsoft.VisualStudio.2022.BuildTools`，安装 C++ build tools 后重试。 |
+| `ffmpeg not found` | 未安装 ffmpeg。按错误提示或上面[系统依赖](#3-系统依赖ffmpeg)章节安装；`subforge doctor` 会打印对应平台命令。 |
 | `python not found` / 缺 faster-whisper 等包 | 没建 venv 或依赖没装齐。运行 `subforge setup`（GPU 加 `--compute cu124`）。 |
 | GPU 没被使用（CUDA available 为 ✗） | 装的是 CPU 版 torch。用 `subforge setup --compute cu124 --force` 重装；RTX 50 系列用 `cu128-nightly`。 |
 | 多张 GPU 想固定默认卡 | 运行 `subforge gpu` 交互选择，或 `subforge gpu --set 1` / `subforge config set cuda_gpu 1`。 |
