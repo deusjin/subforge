@@ -107,7 +107,7 @@ pub fn cache_prune(
     });
 
     // Newest first
-    entries.sort_by(|a, b| b.1.cmp(&a.1));
+    entries.sort_by_key(|entry| std::cmp::Reverse(entry.1));
 
     let mut removed_count = 0u64;
     let mut freed_bytes = 0u64;

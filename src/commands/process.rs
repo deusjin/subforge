@@ -86,6 +86,16 @@ pub async fn run(
     opts: Options,
     cfg: &Config,
 ) -> Result<PathBuf, String> {
+    run_with_config_path(input, output, opts, cfg, None).await
+}
+
+pub async fn run_with_config_path(
+    input: &str,
+    output: Option<&str>,
+    opts: Options,
+    cfg: &Config,
+    config_path: Option<&Path>,
+) -> Result<PathBuf, String> {
     let input_path = PathBuf::from(input);
     if !input_path.exists() {
         return Err(format!("input file not found: {input}"));
@@ -118,12 +128,13 @@ pub async fn run(
         .and_then(|c| c.restore("transcribe", &key, "srt", &srt_path))
         .is_none()
     {
-        transcribe::run(
+        transcribe::run_with_config_path(
             input,
             Some(path_str(&srt_path, "transcribe 输出")?),
             &cfg.asr,
             Some("srt"),
             cfg,
+            config_path,
         )
         .await?;
         if let Some(c) = &cache

@@ -43,8 +43,15 @@ async fn run(cli: Cli, config_path: &std::path::Path, cfg: config::Config) -> Re
                 cfg.asr = a;
             }
             gpu::prepare_for_faster_whisper(&mut cfg, config_path).await?;
-            let p = transcribe::run(&input, output.as_deref(), &cfg.asr, format.as_deref(), &cfg)
-                .await?;
+            let p = transcribe::run_with_config_path(
+                &input,
+                output.as_deref(),
+                &cfg.asr,
+                format.as_deref(),
+                &cfg,
+                Some(config_path),
+            )
+            .await?;
             println!("{}", p.display());
             Ok(())
         }
@@ -142,7 +149,14 @@ async fn run(cli: Cli, config_path: &std::path::Path, cfg: config::Config) -> Re
                 keep_intermediate,
                 synth: synthesize::Options::default(),
             };
-            let p = commands::process::run(&input, output.as_deref(), opts, &cfg).await?;
+            let p = commands::process::run_with_config_path(
+                &input,
+                output.as_deref(),
+                opts,
+                &cfg,
+                Some(config_path),
+            )
+            .await?;
             println!("{}", p.display());
             Ok(())
         }
@@ -201,7 +215,14 @@ async fn run(cli: Cli, config_path: &std::path::Path, cfg: config::Config) -> Re
             if !no_synthesize && uses_nvenc(&opts.synth) {
                 gpu::prepare_for_cuda_task(&mut cfg, config_path, "NVENC GPU").await?;
             }
-            let p = commands::process::run(&input, output.as_deref(), opts, &cfg).await?;
+            let p = commands::process::run_with_config_path(
+                &input,
+                output.as_deref(),
+                opts,
+                &cfg,
+                Some(config_path),
+            )
+            .await?;
             println!("{}", p.display());
             Ok(())
         }

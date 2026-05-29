@@ -142,6 +142,8 @@ subforge subtitle video.srt --translator google                          # → v
 subforge synthesize video.mp4 --subtitle video_translated.srt            # → video_captioned.mp4
 ```
 
+首次使用 `faster-whisper` 且本地模型不存在时，`subforge transcribe` / `translate` / `process` 会列出模型、显示简短说明、让你选择一个下载，并在下载时显示 HuggingFace 进度。非交互环境请提前运行 `subforge model download <模型名>`。
+
 ### GPU 选择
 
 本地 `faster-whisper` 转录和 `nvenc` / `nvenc-hevc` 视频编码会使用 `cuda_gpu` 指定的默认 CUDA GPU。
@@ -247,11 +249,14 @@ subforge config path                              # 显示实际加载的 config
 ```bash
 subforge model list
 subforge model download large
+subforge model download            # 交互选择模型
 
 subforge cache stats
 subforge cache prune --days 30 --max-mb 500       # 按 LRU 淘汰
 subforge cache clean
 ```
+
+`subforge model list` 会显示模型大小、安装状态和适用场景。下载目标目录是 `.subforge/models/faster-whisper/<模型名>`，受 `data_dir` 配置影响。
 
 ## 配置文件位置（搜索顺序）
 
@@ -445,6 +450,7 @@ cargo clippy --all-targets       # lint
 | Windows 编译时报 linker / `link.exe` 错误 | Rust MSVC 工具链缺 Visual Studio Build Tools。运行 `winget install Microsoft.VisualStudio.2022.BuildTools`，安装 C++ build tools 后重试。 |
 | `ffmpeg not found` | 未安装 ffmpeg。按错误提示或上面[系统依赖](#3-系统依赖ffmpeg)章节安装；`subforge doctor` 会打印对应平台命令。 |
 | `python not found` / 缺 faster-whisper 等包 | 没建 venv 或依赖没装齐。运行 `subforge setup`（GPU 加 `--compute cu124`）。 |
+| faster-whisper 首次运行提示选择模型 | 当前 `whisper_model` 没有下载。按提示选择，或先运行 `subforge model download turbo` / `subforge model download medium`。 |
 | GPU 没被使用（CUDA available 为 ✗） | 装的是 CPU 版 torch。用 `subforge setup --compute cu124 --force` 重装；RTX 50 系列用 `cu128-nightly`。 |
 | 多张 GPU 想固定默认卡 | 运行 `subforge gpu` 交互选择，或 `subforge gpu --set 1` / `subforge config set cuda_gpu 1`。 |
 | RTX 50 系列报 `sm_120` 不支持 | Blackwell 需 nightly：`subforge setup --compute cu128-nightly --force`。 |

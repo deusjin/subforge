@@ -14,6 +14,17 @@ pub async fn run(
     format: Option<&str>,
     cfg: &Config,
 ) -> Result<PathBuf, String> {
+    run_with_config_path(input, output, asr, format, cfg, None).await
+}
+
+pub async fn run_with_config_path(
+    input: &str,
+    output: Option<&str>,
+    asr: &str,
+    format: Option<&str>,
+    cfg: &Config,
+    config_path: Option<&Path>,
+) -> Result<PathBuf, String> {
     let input_path = PathBuf::from(input);
     if !input_path.exists() {
         return Err(format!("file not found: {input}"));
@@ -58,7 +69,13 @@ pub async fn run(
     let segments = match asr {
         "bijian" => bijian_transcribe(&audio_path, cfg).await?,
         "whisper-api" => whisper_api_transcribe(&audio_path, cfg).await?,
-        "faster-whisper" => faster_whisper_transcribe(&audio_path, cfg).await?,
+        "faster-whisper" => {
+            let mut cfg = cfg.clone();
+            if let Some(config_path) = config_path {
+                crate::commands::model::ensure_faster_whisper_model(&mut cfg, config_path).await?;
+            }
+            faster_whisper_transcribe(&audio_path, &cfg).await?
+        }
         "whisper-cpp" => whisper_cpp_transcribe(&audio_path, cfg).await?,
         other => {
             return Err(format!(
