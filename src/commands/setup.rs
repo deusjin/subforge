@@ -21,10 +21,9 @@ const PIPELINE_PKGS: &[&str] = &[
 
 pub async fn handle(compute: &str, force: bool, cfg: &Config) -> Result<(), String> {
     let venv = cfg.venv_dir();
-    let venv_python = cfg.venv_bin("python");
 
     // 1. Create the venv (idempotent unless --force).
-    if venv_python.exists() && !force {
+    if cfg.venv_bin("python").exists() && !force {
         println!("✓ venv 已存在: {}（加 --force 重建）", venv.display());
     } else {
         if force && venv.exists() {
@@ -46,6 +45,7 @@ pub async fn handle(compute: &str, force: bool, cfg: &Config) -> Result<(), Stri
             })?;
     }
 
+    let venv_python = cfg.venv_bin("python");
     let py = venv_python.to_string_lossy().into_owned();
 
     // 2. Upgrade pip, then install the pipeline packages.
