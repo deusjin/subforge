@@ -224,13 +224,18 @@ import sys
 from huggingface_hub import snapshot_download
 snapshot_download(repo_id=sys.argv[1], local_dir=sys.argv[2])
 "#;
-    let mut child = tokio::process::Command::new(&python)
+    let mut command = tokio::process::Command::new(&python);
+    command
         .args(["-c", script, &repo, &dest.to_string_lossy()])
         .stdout(Stdio::inherit())
         .stderr(Stdio::piped())
-        .kill_on_drop(true)
-        .spawn()
-        .map_err(|e| format!("Python 未找到: {e}"))?;
+        .kill_on_drop(true);
+    if cfg!(windows) {
+        command
+            .env("PYTHONUTF8", "1")
+            .env("PYTHONIOENCODING", "utf-8");
+    }
+    let mut child = command.spawn().map_err(|e| format!("Python 未找到: {e}"))?;
 
     let mut stderr = child
         .stderr

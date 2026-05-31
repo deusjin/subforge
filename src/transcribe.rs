@@ -549,10 +549,15 @@ async fn faster_whisper_transcribe(audio: &Path, cfg: &Config) -> Result<Vec<Seg
 }
 
 fn faster_whisper_env(cfg: &Config) -> Vec<(&'static str, String)> {
-    if cfg.whisper_device == "cpu" {
-        return Vec::new();
+    let mut env = Vec::new();
+    if cfg!(windows) {
+        env.push(("PYTHONUTF8", "1".to_string()));
+        env.push(("PYTHONIOENCODING", "utf-8".to_string()));
     }
-    crate::gpu::cuda_env(cfg)
+    if cfg.whisper_device != "cpu" {
+        env.extend(crate::gpu::cuda_env(cfg));
+    }
+    env
 }
 
 #[derive(serde::Deserialize)]
