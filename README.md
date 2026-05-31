@@ -469,6 +469,12 @@ cargo clippy --all-targets       # lint
 - **MAPS** (Kim et al. WMT 2024): 术语提取
 - **SubER** (Wilken et al. IWSLT 2022): 字幕评测指标
 
+## 社区 / 友链
+
+本项目在 LINUX DO 社区进行开源推广，感谢社区佬友的交流、反馈与建议。
+
+- [LINUX DO](https://linux.do/)
+
 ## License
 
 MIT
