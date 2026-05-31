@@ -51,10 +51,10 @@ cargo --version
 mkdir $env:USERPROFILE\.cargo -Force
 @"
 [source.crates-io]
-replace-with = "tuna"
+replace-with = "rsproxy"
 
-[source.tuna]
-registry = "sparse+https://mirrors.tuna.tsinghua.edu.cn/crates.io-index/"
+[source.rsproxy]
+registry = "sparse+https://rsproxy.cn/index/"
 "@ | Set-Content -Encoding UTF8 $env:USERPROFILE\.cargo\config.toml
 ```
 
