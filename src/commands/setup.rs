@@ -123,9 +123,14 @@ fn python_install_hint() -> &'static str {
 /// Spawn a command with inherited stdio so the user sees live pip progress,
 /// and turn a non-zero exit or spawn failure into a readable error.
 async fn run(program: &str, args: &[&str]) -> Result<(), String> {
-    let status = Command::new(program)
-        .args(args)
-        .kill_on_drop(true)
+    let mut command = Command::new(program);
+    command.args(args).kill_on_drop(true);
+    if cfg!(windows) {
+        command
+            .env("PYTHONUTF8", "1")
+            .env("PYTHONIOENCODING", "utf-8");
+    }
+    let status = command
         .status()
         .await
         .map_err(|e| format!("无法执行 `{program}`: {e}"))?;
