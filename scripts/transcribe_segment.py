@@ -110,6 +110,42 @@ def restore_punctuation(text: str) -> str:
         return text
 
 
+def prefetch_sat_assets(model_name: str, style_or_domain: str | None = None, language: str | None = None):
+    """Warm the Hugging Face cache so SaT downloads show visible progress."""
+    repo_id = f"segment-any-text/{model_name}"
+    try:
+        from huggingface_hub import snapshot_download
+        from transformers import AutoTokenizer
+
+        print("checking/downloading SaT tokenizer (facebookAI/xlm-roberta-base)...", file=sys.stderr, flush=True)
+        AutoTokenizer.from_pretrained("facebookAI/xlm-roberta-base")
+
+        print(f"checking/downloading SaT model ({repo_id})...", file=sys.stderr, flush=True)
+        snapshot_download(
+            repo_id=repo_id,
+            allow_patterns=["config.json", "pytorch_model.bin", "model.safetensors"],
+        )
+
+        if style_or_domain and language:
+            try:
+                from wtpsplit.utils import Constants
+
+                print(
+                    f"checking/downloading SaT LoRA ({style_or_domain}/{language})...",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                snapshot_download(
+                    repo_id=repo_id,
+                    allow_patterns=[f"loras/{style_or_domain}/{language}/*"],
+                    local_dir=Constants.CACHE_DIR,
+                )
+            except Exception as e:
+                print(f"SaT LoRA prefetch unavailable ({e})", file=sys.stderr, flush=True)
+    except Exception as e:
+        print(f"SaT prefetch unavailable ({e}); loading directly", file=sys.stderr, flush=True)
+
+
 def segment_with_sat(words: list[dict], lang: str, max_chars: int, target_chars: int):
     """Run SaT segmentation, map segments back to word timestamps."""
     from wtpsplit import SaT
@@ -120,10 +156,12 @@ def segment_with_sat(words: list[dict], lang: str, max_chars: int, target_chars:
     sat = None
     if lang == "en":
         try:
+            prefetch_sat_assets("sat-3l", style_or_domain="ted2020-corrupted", language="en")
             sat = SaT("sat-3l", style_or_domain="ted2020-corrupted", language="en")
         except Exception as e:
             print(f"TED LoRA unavailable ({e}), using sat-3l-sm", file=sys.stderr)
     if sat is None:
+        prefetch_sat_assets("sat-3l-sm")
         sat = SaT("sat-3l-sm")
 
     # Concatenate words preserving original spacing (whisper words already include leading space)
