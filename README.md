@@ -84,26 +84,13 @@ Install Rust:
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal # Linux / macOS
-winget install Rustlang.Rustup --override "-y --profile minimal --default-toolchain stable" # Windows
 ```
 
-The minimal Rustup profile is enough for SubForge. It skips `rust-docs`, which
-can be very slow to download on Windows and is not needed for building the CLI.
-If Rustup is already stuck downloading docs, cancel it, reopen the terminal, and
-run:
-
-```bash
-rustup set profile minimal
-rustup toolchain install stable
-rustup default stable
-cargo --version
-```
-
-If Rustup downloads `cargo`, `rust-std`, or `rustc` very slowly from
-`static.rust-lang.org`, use a mirror before installing the toolchain. For
-example, in Windows PowerShell:
+Windows PowerShell:
 
 ```powershell
+winget install Rustlang.Rustup
+
 $env:RUSTUP_DIST_SERVER="https://mirrors.tuna.tsinghua.edu.cn/rustup"
 $env:RUSTUP_UPDATE_ROOT="https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup"
 
@@ -111,13 +98,6 @@ rustup set profile minimal
 rustup toolchain install stable
 rustup default stable
 cargo --version
-```
-
-To keep the mirror for future terminals:
-
-```powershell
-[Environment]::SetEnvironmentVariable("RUSTUP_DIST_SERVER", "https://mirrors.tuna.tsinghua.edu.cn/rustup", "User")
-[Environment]::SetEnvironmentVariable("RUSTUP_UPDATE_ROOT", "https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup", "User")
 ```
 
 Install ffmpeg:

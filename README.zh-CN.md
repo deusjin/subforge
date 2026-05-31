@@ -26,36 +26,20 @@
 
 | 工具 | 用途 | Linux / macOS | Windows |
 |------|------|---------------|---------|
-| Rust 1.88+ | 编译 `subforge` 本体 | 见下方最小安装命令 | 见下方最小安装命令；必要时按提示安装 MSVC Build Tools |
+| Rust 1.88+ | 编译 `subforge` 本体 | 见下方安装命令 | 见下方安装命令 |
 | Python 3.9+ | faster-whisper / SaT / SubER 运行环境 | 系统包管理器或 python.org | `winget install Python.Python.3.12`，安装后确认 `python --version` 可用 |
 | ffmpeg | 抽音频、烧制/封装字幕 | 见下一节 | 见下一节 |
-
-安装 Rust 建议使用 minimal profile。它足够编译 SubForge，并会跳过
-`rust-docs`；Windows 上 `rust-docs` 经常从 `static.rust-lang.org` 下载很慢，
-但构建本项目不需要它。
 
 ```bash
 # Linux / macOS
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
-
-# Windows PowerShell
-winget install Rustlang.Rustup --override "-y --profile minimal --default-toolchain stable"
 ```
 
-如果已经在默认安装流程里卡在 `rust-docs downloading`，可以 `Ctrl+C` 取消，
-重新打开 PowerShell 后执行：
+Windows PowerShell:
 
 ```powershell
-rustup set profile minimal
-rustup toolchain install stable
-rustup default stable
-cargo --version
-```
+winget install Rustlang.Rustup
 
-如果卡住的不是 `rust-docs`，而是 `cargo` / `rust-std` / `rustc` 下载很慢，
-说明网络到 `static.rust-lang.org` 很慢。可以先设置清华镜像源，再安装工具链：
-
-```powershell
 $env:RUSTUP_DIST_SERVER="https://mirrors.tuna.tsinghua.edu.cn/rustup"
 $env:RUSTUP_UPDATE_ROOT="https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup"
 
@@ -63,13 +47,6 @@ rustup set profile minimal
 rustup toolchain install stable
 rustup default stable
 cargo --version
-```
-
-如需长期生效，执行后重新打开 PowerShell：
-
-```powershell
-[Environment]::SetEnvironmentVariable("RUSTUP_DIST_SERVER", "https://mirrors.tuna.tsinghua.edu.cn/rustup", "User")
-[Environment]::SetEnvironmentVariable("RUSTUP_UPDATE_ROOT", "https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup", "User")
 ```
 
 安装 Rust 后确认 `cargo` 可用：
