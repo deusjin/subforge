@@ -26,14 +26,34 @@
 
 | 工具 | 用途 | Linux / macOS | Windows |
 |------|------|---------------|---------|
-| Rust 1.88+ | 编译 `subforge` 本体 | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install Rustlang.Rustup`，或安装 rustup-init；按提示安装 MSVC Build Tools |
+| Rust 1.88+ | 编译 `subforge` 本体 | 见下方最小安装命令 | 见下方最小安装命令；必要时按提示安装 MSVC Build Tools |
 | Python 3.9+ | faster-whisper / SaT / SubER 运行环境 | 系统包管理器或 python.org | `winget install Python.Python.3.12`，安装后确认 `python --version` 可用 |
 | ffmpeg | 抽音频、烧制/封装字幕 | 见下一节 | 见下一节 |
 
-安装 Rust 后先确认 `cargo` 可用：
+安装 Rust 建议使用 minimal profile。它足够编译 SubForge，并会跳过
+`rust-docs`；Windows 上 `rust-docs` 经常从 `static.rust-lang.org` 下载很慢，
+但构建本项目不需要它。
 
 ```bash
-rustup update
+# Linux / macOS
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+
+# Windows PowerShell
+winget install Rustlang.Rustup --override "-y --profile minimal --default-toolchain stable"
+```
+
+如果已经在默认安装流程里卡在 `rust-docs downloading`，可以 `Ctrl+C` 取消，
+重新打开 PowerShell 后执行：
+
+```powershell
+rustup set profile minimal
+rustup update stable
+cargo --version
+```
+
+安装 Rust 后确认 `cargo` 可用：
+
+```bash
 cargo --version
 ```
 

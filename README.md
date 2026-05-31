@@ -80,6 +80,24 @@ SubForge currently builds from source. Prebuilt binaries are not published yet.
 | Python 3.9+ | Run faster-whisper, SaT, SubER, and related sidecars |
 | ffmpeg | Extract audio, burn subtitles, and mux subtitle tracks |
 
+Install Rust:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal # Linux / macOS
+winget install Rustlang.Rustup --override "-y --profile minimal --default-toolchain stable" # Windows
+```
+
+The minimal Rustup profile is enough for SubForge. It skips `rust-docs`, which
+can be very slow to download on Windows and is not needed for building the CLI.
+If Rustup is already stuck downloading docs, cancel it, reopen the terminal, and
+run:
+
+```bash
+rustup set profile minimal
+rustup update stable
+cargo --version
+```
+
 Install ffmpeg:
 
 ```bash
