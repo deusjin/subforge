@@ -47,8 +47,29 @@ winget install Rustlang.Rustup --override "-y --profile minimal --default-toolch
 
 ```powershell
 rustup set profile minimal
-rustup update stable
+rustup toolchain install stable
+rustup default stable
 cargo --version
+```
+
+如果卡住的不是 `rust-docs`，而是 `cargo` / `rust-std` / `rustc` 下载很慢，
+说明网络到 `static.rust-lang.org` 很慢。可以先设置清华镜像源，再安装工具链：
+
+```powershell
+$env:RUSTUP_DIST_SERVER="https://mirrors.tuna.tsinghua.edu.cn/rustup"
+$env:RUSTUP_UPDATE_ROOT="https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup"
+
+rustup set profile minimal
+rustup toolchain install stable
+rustup default stable
+cargo --version
+```
+
+如需长期生效，执行后重新打开 PowerShell：
+
+```powershell
+[Environment]::SetEnvironmentVariable("RUSTUP_DIST_SERVER", "https://mirrors.tuna.tsinghua.edu.cn/rustup", "User")
+[Environment]::SetEnvironmentVariable("RUSTUP_UPDATE_ROOT", "https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup", "User")
 ```
 
 安装 Rust 后确认 `cargo` 可用：

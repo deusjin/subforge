@@ -94,8 +94,30 @@ run:
 
 ```bash
 rustup set profile minimal
-rustup update stable
+rustup toolchain install stable
+rustup default stable
 cargo --version
+```
+
+If Rustup downloads `cargo`, `rust-std`, or `rustc` very slowly from
+`static.rust-lang.org`, use a mirror before installing the toolchain. For
+example, in Windows PowerShell:
+
+```powershell
+$env:RUSTUP_DIST_SERVER="https://mirrors.tuna.tsinghua.edu.cn/rustup"
+$env:RUSTUP_UPDATE_ROOT="https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup"
+
+rustup set profile minimal
+rustup toolchain install stable
+rustup default stable
+cargo --version
+```
+
+To keep the mirror for future terminals:
+
+```powershell
+[Environment]::SetEnvironmentVariable("RUSTUP_DIST_SERVER", "https://mirrors.tuna.tsinghua.edu.cn/rustup", "User")
+[Environment]::SetEnvironmentVariable("RUSTUP_UPDATE_ROOT", "https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup", "User")
 ```
 
 Install ffmpeg:
