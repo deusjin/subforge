@@ -1,12 +1,29 @@
-# subforge
+<div align="center">
+  <img src="assets/logo.png" alt="SubForge" width="420">
 
-Rust CLI 视频字幕处理工具：转录 → 智能分段 → 翻译 → 质量评估 → 烧制 / 软封装。
+  <h3>Rust CLI 视频字幕处理工具：转录、分段、翻译、评估、烧制 / 软封装。</h3>
+
+  <p>
+    <a href="https://github.com/deusjin/subforge/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/deusjin/subforge/actions/workflows/ci.yml/badge.svg"></a>
+    <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+    <a href="Cargo.toml"><img alt="Rust 1.88+" src="https://img.shields.io/badge/rust-1.88%2B-orange.svg"></a>
+  </p>
+
+  <p>
+    <a href="README.md">English</a> |
+    <a href="README.zh-CN.md">简体中文</a>
+  </p>
+</div>
 
 基于 SOTA 学术研究的端到端管线：
 - **SaT (EMNLP 2024)** 神经分段，F1=96.5
 - **GEMBA-MQM** 质量评估 + 自动重翻
 - **MAPS 术语提取** + 项目级翻译记忆
 - **SubER (IWSLT 2022)** 字幕质量评测
+
+<p align="center">
+  <img src="assets/result.png" alt="SubForge 双语字幕效果预览" width="900">
+</p>
 
 ## 安装
 

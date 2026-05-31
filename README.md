@@ -1,12 +1,19 @@
-# SubForge
+<div align="center">
+  <img src="assets/logo.png" alt="SubForge" width="420">
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+  <h3>Turn video subtitle production into a reproducible AI pipeline.</h3>
 
-[![CI](https://github.com/deusjin/subforge/actions/workflows/ci.yml/badge.svg)](https://github.com/deusjin/subforge/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](Cargo.toml)
+  <p>
+    <a href="https://github.com/deusjin/subforge/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/deusjin/subforge/actions/workflows/ci.yml/badge.svg"></a>
+    <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+    <a href="Cargo.toml"><img alt="Rust 1.88+" src="https://img.shields.io/badge/rust-1.88%2B-orange.svg"></a>
+  </p>
 
-Turn video subtitle production into a reproducible command-line pipeline.
+  <p>
+    <a href="README.md">English</a> |
+    <a href="README.zh-CN.md">简体中文</a>
+  </p>
+</div>
 
 SubForge is a Rust CLI for transcribing, segmenting, translating, evaluating,
 and muxing or burning subtitles into videos. It is built for people who process
@@ -21,6 +28,10 @@ video / audio
   -> quality estimation
   -> hard-burned video / soft subtitle track
 ```
+
+<p align="center">
+  <img src="assets/result.png" alt="SubForge bilingual subtitle output preview" width="900">
+</p>
 
 ## Why SubForge
 
