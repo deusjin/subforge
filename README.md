@@ -1,5 +1,7 @@
 # SubForge
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 [![CI](https://github.com/deusjin/subforge/actions/workflows/ci.yml/badge.svg)](https://github.com/deusjin/subforge/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](Cargo.toml)
@@ -10,8 +12,6 @@ SubForge is a Rust CLI for transcribing, segmenting, translating, evaluating,
 and muxing or burning subtitles into videos. It is built for people who process
 videos repeatedly and do not want every project to become a pile of scripts,
 temporary files, model paths, ffmpeg flags, and manual rework.
-
-[Chinese README](README.zh-CN.md)
 
 ```text
 video / audio
