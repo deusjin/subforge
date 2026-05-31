@@ -1,18 +1,11 @@
 <div align="center">
-  <img src="assets/logo.png" alt="SubForge" width="380">
-
-  <h3>Rust CLI 视频字幕处理工具：转录、分段、翻译、评估、烧制 / 软封装。</h3>
-
-  <p>
-    <a href="https://github.com/deusjin/subforge/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/deusjin/subforge/actions/workflows/ci.yml/badge.svg"></a>
-    <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
-    <a href="Cargo.toml"><img alt="Rust 1.88+" src="https://img.shields.io/badge/rust-1.88%2B-orange.svg"></a>
-  </p>
-
-  <p>
-    <a href="README.md">English</a> |
-    <a href="README.zh-CN.md">简体中文</a>
-  </p>
+  <img src="assets/logo-compact.png" alt="SubForge" height="96"><br>
+  <strong>Rust CLI 视频字幕处理工具：转录、分段、翻译、评估、烧制 / 软封装。</strong><br>
+  <a href="https://github.com/deusjin/subforge/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/deusjin/subforge/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+  <a href="Cargo.toml"><img alt="Rust 1.88+" src="https://img.shields.io/badge/rust-1.88%2B-orange.svg"></a><br>
+  <a href="README.md">English</a> |
+  <a href="README.zh-CN.md">简体中文</a>
 </div>
 
 基于 SOTA 学术研究的端到端管线：
