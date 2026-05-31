@@ -47,6 +47,15 @@ rustup set profile minimal
 rustup toolchain install stable
 rustup default stable
 cargo --version
+
+mkdir $env:USERPROFILE\.cargo -Force
+@"
+[source.crates-io]
+replace-with = "tuna"
+
+[source.tuna]
+registry = "sparse+https://mirrors.tuna.tsinghua.edu.cn/crates.io-index/"
+"@ | Set-Content -Encoding UTF8 $env:USERPROFILE\.cargo\config.toml
 ```
 
 安装 Rust 后确认 `cargo` 可用：
