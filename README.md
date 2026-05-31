@@ -375,7 +375,7 @@ Common options:
 | `asr` | `faster-whisper` | Speech recognition backend |
 | `whisper_model` | `small.en` | faster-whisper model |
 | `segmenter` | `sat` | Subtitle segmentation algorithm |
-| `translator` | `google` | Translation backend |
+| `translator` | `bing` | Translation backend |
 | `target_language` | `zh-Hans` | Target language |
 | `layout` | `target-above` | Subtitle layout |
 | `thread_num` | `3` | Concurrent request count |

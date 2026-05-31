@@ -32,7 +32,7 @@ target_color         = ""                 # 译文行颜色 RRGGBB hex（如 FFF
 source_color         = ""                 # 原文行颜色 RRGGBB hex，留空 = libass 默认
 
 # --- 翻译 ---
-translator           = "google"           # llm / google / bing / "" (不翻译)
+translator           = "bing"             # llm / google / bing / "" (不翻译)
 target_language      = "zh-Hans"
 thread_num           = 3
 batch_size           = 7

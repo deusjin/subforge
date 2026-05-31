@@ -138,7 +138,7 @@ impl Default for Config {
             target_color: String::new(),
             source_color: String::new(),
 
-            translator: "google".into(),
+            translator: "bing".into(),
             target_language: "zh-Hans".into(),
             thread_num: 3,
             batch_size: 7,

@@ -386,7 +386,7 @@ subforge config set tm_dir /shared/path/.subforge-tm
 | `target_chars_per_cue` | 60 | 偏好字符数 |
 | `polish_with_llm` | false | LLM 边界润色（额外 API 调用） |
 | `chained_translation` | true | 顺序翻译（真 moving window）/ false=并发 wave |
-| `translator` | `google` | 翻译器 |
+| `translator` | `bing` | 翻译器 |
 | `target_language` | `zh-Hans` | 目标语言 |
 | `layout` | `target-above` | 布局：target-above / source-above / target-only / source-only |
 | `target_color` / `source_color` | (空) | 双行各自颜色 RRGGBB hex；空 = libass 默认 |
