@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/logo.png" alt="SubForge" width="420">
+  <img src="assets/logo.png" alt="SubForge" width="380">
 
   <h3>Turn video subtitle production into a reproducible AI pipeline.</h3>
 

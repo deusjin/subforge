@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/logo.png" alt="SubForge" width="420">
+  <img src="assets/logo.png" alt="SubForge" width="380">
 
   <h3>Rust CLI 视频字幕处理工具：转录、分段、翻译、评估、烧制 / 软封装。</h3>
 
