@@ -27,6 +27,9 @@ testvideos/
 .vscode/
 *.swp
 
+# Isolated local experiment worktrees.
+.worktrees/
+
 # Removed legacy names (kept transitionally so old worktrees stay clean)
 .vcnew/
 .vcnew-tm/
