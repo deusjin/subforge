@@ -184,6 +184,24 @@ subforge synthesize video.mp4 --subtitle video_translated.srt            # → v
 
 首次使用 `faster-whisper` 且本地模型不存在时，`subforge transcribe` / `translate` / `process` 会列出模型、显示简短说明、让你选择一个下载，并在下载时显示 HuggingFace 进度。非交互环境请提前运行 `subforge model download <模型名>`。
 
+### 命令概览
+
+| 命令 | 用途 |
+|------|------|
+| `transcribe` | 音频/视频转 SRT |
+| `subtitle` | SRT 翻译为双语/目标语言 SRT |
+| `translate` | 转录 + 翻译，不烧制视频 |
+| `synthesize` | 视频 + SRT 生成硬烧或软封装产物 |
+| `process` | 全流程：转录、翻译、合成 |
+| `batch` | 批量翻译或处理多个视频 |
+| `eval` | 使用 SubER 和文本指标评估字幕质量 |
+| `setup` | 创建 Python venv 并安装 sidecar 依赖 |
+| `doctor` | 检查 ffmpeg、Python 包、CUDA、配置和 sidecar 同步 |
+| `model` | 列出和下载 faster-whisper 模型 |
+| `gpu` | 探测并选择默认 CUDA GPU |
+| `cache` | 查看、修剪或清理缓存 |
+| `config` | 查看、读取、设置和定位配置 |
+
 ### GPU 选择
 
 本地 `faster-whisper` 转录和 `nvenc` / `nvenc-hevc` 视频编码会使用 `cuda_gpu` 指定的默认 CUDA GPU。
