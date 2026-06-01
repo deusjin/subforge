@@ -4,7 +4,7 @@
 //! evolve independently, and so individual command handlers can take typed
 //! arg structs in tests rather than parsing argv.
 
-use clap::{ArgAction, Parser, Subcommand};
+use clap::{ArgAction, Args, Parser, Subcommand};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -13,13 +13,25 @@ pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
     /// 配置文件路径
-    #[arg(long, global = true)]
+    #[arg(long, global = true, help_heading = "Global Options")]
     pub config: Option<PathBuf>,
     /// 静默：只输出错误
-    #[arg(short = 'q', long, global = true, action = ArgAction::SetTrue)]
+    #[arg(
+        short = 'q',
+        long,
+        global = true,
+        action = ArgAction::SetTrue,
+        help_heading = "Global Options"
+    )]
     pub quiet: bool,
     /// 详细：打印每批/每条诊断信息
-    #[arg(short = 'v', long, global = true, action = ArgAction::SetTrue)]
+    #[arg(
+        short = 'v',
+        long,
+        global = true,
+        action = ArgAction::SetTrue,
+        help_heading = "Global Options"
+    )]
     pub verbose: bool,
 }
 
@@ -142,19 +154,19 @@ pub enum Commands {
         #[arg(short, long)]
         output: Option<String>,
         /// ASR 后端覆盖
-        #[arg(long)]
+        #[arg(long, help_heading = "Pipeline Options")]
         asr: Option<String>,
         /// 翻译器覆盖：llm / google / bing
-        #[arg(long)]
+        #[arg(long, help_heading = "Pipeline Options")]
         translator: Option<String>,
         /// 目标语言代码（如 zh-Hans / en）
-        #[arg(long)]
+        #[arg(long, help_heading = "Pipeline Options")]
         target_language: Option<String>,
         /// 跳过缓存（强制重新转录 / 翻译）
-        #[arg(long, action = ArgAction::SetTrue)]
+        #[arg(long, action = ArgAction::SetTrue, help_heading = "Pipeline Options")]
         no_cache: bool,
         /// 保留中间文件（默认会清理只剩最终输出）
-        #[arg(long, action = ArgAction::SetTrue)]
+        #[arg(long, action = ArgAction::SetTrue, help_heading = "Pipeline Options")]
         keep_intermediate: bool,
     },
     /// 全流程：transcribe → subtitle → synthesize
@@ -214,6 +226,18 @@ pub enum Commands {
         /// 字幕占据的画面宽度百分比 (1-100)，留空使用 config 的 synth_width_ratio。推荐 90。
         #[arg(long)]
         width_ratio: Option<u8>,
+    },
+    /// 批量处理多个视频
+    #[command(after_help = "\
+Examples:
+  subforge batch translate videos/ --dry-run
+  subforge batch translate videos/ -o out --recursive --jobs 2
+  subforge batch process videos/ -o out --recursive --synth-mode soft
+
+Use `subforge batch translate --help` or `subforge batch process --help` for mode-specific options.")]
+    Batch {
+        #[command(subcommand)]
+        command: BatchCommand,
     },
     /// 配置管理
     Config {
@@ -278,6 +302,158 @@ pub enum CacheCommand {
 }
 
 #[derive(Subcommand)]
+pub enum BatchCommand {
+    /// 批量转录 + 翻译（不烧制字幕）
+    #[command(after_help = "\
+Examples:
+  subforge batch translate videos/ --dry-run
+  subforge batch translate videos/ more.mp4 -o out
+  subforge batch translate videos/ -o out --recursive --jobs 2 --report batch.json
+
+Behavior:
+  - Directory inputs scan one level by default; add --recursive for subdirectories.
+  - Existing translated SRT outputs are skipped unless --overwrite is set.
+  - With -o, output is treated as a directory root, never as a single file path.")]
+    Translate {
+        #[command(flatten)]
+        common: BatchCommon,
+        /// ASR 后端覆盖
+        #[arg(long, help_heading = "Pipeline Options")]
+        asr: Option<String>,
+        /// 翻译器覆盖：llm / google / bing
+        #[arg(long, help_heading = "Pipeline Options")]
+        translator: Option<String>,
+        /// 目标语言代码（如 zh-Hans / en）
+        #[arg(long, help_heading = "Pipeline Options")]
+        target_language: Option<String>,
+        /// 跳过缓存（强制重新转录 / 翻译）
+        #[arg(long, action = ArgAction::SetTrue, help_heading = "Pipeline Options")]
+        no_cache: bool,
+        /// 保留中间文件（默认会清理只剩最终输出）
+        #[arg(long, action = ArgAction::SetTrue, help_heading = "Pipeline Options")]
+        keep_intermediate: bool,
+    },
+    /// 批量全流程：transcribe → subtitle → synthesize
+    #[command(after_help = "\
+Examples:
+  subforge batch process videos/ --dry-run
+  subforge batch process videos/ -o out --recursive --synth-mode soft
+  subforge batch process ep1.mp4 ep2.mp4 -o out --synth-mode both
+
+Behavior:
+  - Directory inputs scan one level by default; add --recursive for subdirectories.
+  - Existing final video outputs are skipped unless --overwrite is set.
+  - With --synth-mode both, both hard-burn and soft-subtitle outputs must exist to skip.")]
+    Process {
+        #[command(flatten)]
+        common: BatchCommon,
+        /// ASR 后端覆盖
+        #[arg(long, help_heading = "Pipeline Options")]
+        asr: Option<String>,
+        /// 翻译器覆盖
+        #[arg(long, help_heading = "Pipeline Options")]
+        translator: Option<String>,
+        /// 目标语言代码
+        #[arg(long, help_heading = "Pipeline Options")]
+        target_language: Option<String>,
+        /// 跳过烧制步骤（仅产生翻译 SRT，等价 batch translate）
+        #[arg(long, action = ArgAction::SetTrue, help_heading = "Pipeline Options")]
+        no_synthesize: bool,
+        /// 跳过缓存
+        #[arg(long, action = ArgAction::SetTrue, help_heading = "Pipeline Options")]
+        no_cache: bool,
+        /// 保留中间文件（转录 SRT、翻译 SRT）
+        #[arg(long, action = ArgAction::SetTrue, help_heading = "Pipeline Options")]
+        keep_intermediate: bool,
+
+        // ---- 烧制选项（与 `subforge process` 同名） ----
+        /// 烧制模式：hard / soft / both（留空使用 config 的 synth_mode）
+        #[arg(long, help_heading = "Synthesis Options")]
+        synth_mode: Option<String>,
+        /// 字体名（如 "Source Han Sans" / "Microsoft YaHei"）
+        #[arg(long, help_heading = "Synthesis Options")]
+        font: Option<String>,
+        /// 字号（像素）
+        #[arg(long, help_heading = "Synthesis Options")]
+        font_size: Option<u32>,
+        /// 字体颜色 RRGGBB（如 FFFFFF）
+        #[arg(long, help_heading = "Synthesis Options")]
+        font_color: Option<String>,
+        /// 描边颜色 RRGGBB
+        #[arg(long, help_heading = "Synthesis Options")]
+        outline_color: Option<String>,
+        /// 描边宽度（像素）
+        #[arg(long, help_heading = "Synthesis Options")]
+        outline_width: Option<u32>,
+        /// 字幕位置：bottom / center / top / top-right 等
+        #[arg(long, help_heading = "Synthesis Options")]
+        position: Option<String>,
+        /// 距画面边缘的垂直边距（像素）
+        #[arg(long, help_heading = "Synthesis Options")]
+        margin_v: Option<u32>,
+        /// 原样透传 force_style（覆盖前面所有 --font* 选项）
+        #[arg(long, help_heading = "Synthesis Options")]
+        style: Option<String>,
+        /// 视频编码器：x264 / x265 / nvenc / nvenc-hevc / qsv / videotoolbox
+        #[arg(long, help_heading = "Synthesis Options")]
+        encoder: Option<String>,
+        /// 质量参数（CRF / cq / qp，越小越清晰）
+        #[arg(long, help_heading = "Synthesis Options")]
+        crf: Option<u8>,
+        /// 编码速度档位：veryfast / fast / medium / slow / veryslow
+        #[arg(long, help_heading = "Synthesis Options")]
+        preset: Option<String>,
+        /// 最大码率（如 "8M"、"5000k"）
+        #[arg(long, help_heading = "Synthesis Options")]
+        max_bitrate: Option<String>,
+        /// 字幕占据的画面宽度百分比 (1-100)，留空使用 config 的 synth_width_ratio。推荐 90。
+        #[arg(long, help_heading = "Synthesis Options")]
+        width_ratio: Option<u8>,
+    },
+}
+
+#[derive(Args, Debug, Clone)]
+pub struct BatchCommon {
+    /// 输入视频文件或目录，可传多个
+    #[arg(required = true)]
+    pub inputs: Vec<String>,
+    /// 输出目录根（批量模式只按目录解释）
+    #[arg(short, long, help_heading = "Batch Options")]
+    pub output: Option<String>,
+    /// 递归扫描输入目录
+    #[arg(long, action = ArgAction::SetTrue, help_heading = "Batch Options")]
+    pub recursive: bool,
+    /// 同时处理的视频数
+    #[arg(
+        long,
+        default_value_t = 1,
+        value_parser = parse_positive_usize,
+        help_heading = "Batch Options"
+    )]
+    pub jobs: usize,
+    /// 已有最终产物时仍然重跑
+    #[arg(long, action = ArgAction::SetTrue, help_heading = "Batch Options")]
+    pub overwrite: bool,
+    /// 只打印计划，不实际执行
+    #[arg(long, action = ArgAction::SetTrue, help_heading = "Batch Options")]
+    pub dry_run: bool,
+    /// 写入 JSON 报告路径
+    #[arg(long, help_heading = "Batch Options")]
+    pub report: Option<String>,
+}
+
+fn parse_positive_usize(s: &str) -> Result<usize, String> {
+    let value = s
+        .parse::<usize>()
+        .map_err(|e| format!("invalid positive integer: {e}"))?;
+    if value == 0 {
+        Err("value must be at least 1".into())
+    } else {
+        Ok(value)
+    }
+}
+
+#[derive(Subcommand)]
 pub enum ModelCommand {
     /// 列出可用模型
     List,
@@ -295,4 +471,68 @@ pub enum ConfigCommand {
     Set { key: String, value: String },
     /// 显示配置文件路径
     Path,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::Parser;
+
+    #[test]
+    fn parses_batch_translate_dry_run() {
+        let cli =
+            Cli::try_parse_from(["subforge", "batch", "translate", "--dry-run", "a.mp4"]).unwrap();
+        match cli.command {
+            Commands::Batch {
+                command:
+                    BatchCommand::Translate {
+                        common, no_cache, ..
+                    },
+            } => {
+                assert!(common.dry_run);
+                assert_eq!(common.jobs, 1);
+                assert!(!no_cache);
+                assert_eq!(common.inputs, vec!["a.mp4"]);
+            }
+            _ => panic!("expected batch translate"),
+        }
+    }
+
+    #[test]
+    fn parses_batch_process_recursive_output_and_jobs() {
+        let cli = Cli::try_parse_from([
+            "subforge",
+            "batch",
+            "process",
+            "--recursive",
+            "-o",
+            "out",
+            "--jobs",
+            "2",
+            "videos",
+        ])
+        .unwrap();
+        match cli.command {
+            Commands::Batch {
+                command: BatchCommand::Process { common, .. },
+            } => {
+                assert!(common.recursive);
+                assert_eq!(common.output.as_deref(), Some("out"));
+                assert_eq!(common.jobs, 2);
+                assert_eq!(common.inputs, vec!["videos"]);
+            }
+            _ => panic!("expected batch process"),
+        }
+    }
+
+    #[test]
+    fn rejects_zero_batch_jobs() {
+        let result =
+            Cli::try_parse_from(["subforge", "batch", "translate", "--jobs", "0", "a.mp4"]);
+        let err = match result {
+            Ok(_) => panic!("expected --jobs 0 to be rejected"),
+            Err(err) => err,
+        };
+        assert!(err.to_string().contains("at least 1"));
+    }
 }

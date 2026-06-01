@@ -1,3 +1,4 @@
+pub mod batch;
 pub mod cache_cmd;
 pub mod config_cmd;
 pub mod doctor;

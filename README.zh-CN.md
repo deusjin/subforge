@@ -209,6 +209,55 @@ transcribing (device=auto via CUDA_VISIBLE_DEVICES=0)...
 - 翻译：按字幕条或 LLM batch 显示进度条。
 - 合成：hard burn 时保留 ffmpeg 的 `frame/time/speed` 实时进度。
 
+### 批量处理
+
+只想要翻译后的 SRT，用 `batch translate`。想直接生成带字幕的视频，用 `batch process`。
+
+先预览，不实际运行：
+
+```bash
+subforge batch translate videos/ -o out --dry-run
+subforge batch process videos/ -o out --dry-run
+```
+
+确认输出计划没问题后，去掉 `--dry-run`：
+
+```bash
+subforge batch translate videos/ -o out
+subforge batch process videos/ -o out --synth-mode soft
+```
+
+常用写法：
+
+```bash
+# 明确指定多个视频
+subforge batch translate ep1.mp4 ep2.mp4 ep3.mp4 -o out
+
+# 扫描子目录
+subforge batch translate videos/ -o out --recursive
+
+# 同时处理 2 个视频
+subforge batch process videos/ -o out --jobs 2
+
+# 已有最终产物也强制重跑
+subforge batch process videos/ -o out --overwrite
+
+# 写 JSON 报告，方便脚本检查成功/失败
+subforge batch translate videos/ -o out --report batch-report.json
+```
+
+批量规则：
+
+| 规则 | 行为 |
+|------|------|
+| 输入 | 接受视频文件和目录。目录默认只扫一层。 |
+| 递归 | 加 `--recursive` 才会扫描子目录。 |
+| 输出 | 不传 `-o` 时写到每个视频旁边；传 `-o DIR` 时写到这个输出目录下。 |
+| 已有产物 | 默认跳过已有最终产物；加 `--overwrite` 强制重跑。 |
+| 并发 | 默认 `--jobs 1`。只有确认 GPU / API 限流扛得住时再调高。 |
+| 翻译记忆 | 未设置 `tm_dir` 时，batch 会为本批视频自动共享一个 `.subforge-tm`，保证系列视频术语更一致。 |
+| 失败处理 | 单个视频失败后继续处理剩余视频；最后汇总失败项，并用非零退出码表示批次未完全成功。 |
+
 全流程会汇报每个阶段和总耗时：
 
 ```text

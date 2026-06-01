@@ -226,6 +226,87 @@ async fn run(cli: Cli, config_path: &std::path::Path, cfg: config::Config) -> Re
             println!("{}", p.display());
             Ok(())
         }
+        Commands::Batch { command } => match command {
+            subforge::cli::BatchCommand::Translate {
+                common,
+                asr,
+                translator,
+                target_language,
+                no_cache,
+                keep_intermediate,
+            } => {
+                let mut cfg = cfg;
+                apply_overrides(&mut cfg, translator, target_language, asr);
+                if !common.dry_run {
+                    gpu::prepare_for_faster_whisper(&mut cfg, config_path).await?;
+                }
+                let opts = commands::process::Options {
+                    no_synthesize: true,
+                    no_cache,
+                    keep_intermediate,
+                    synth: synthesize::Options::default(),
+                };
+                commands::batch::run(common, opts, &cfg, Some(config_path)).await
+            }
+            subforge::cli::BatchCommand::Process {
+                common,
+                asr,
+                translator,
+                target_language,
+                no_synthesize,
+                no_cache,
+                keep_intermediate,
+                synth_mode,
+                font,
+                font_size,
+                font_color,
+                outline_color,
+                outline_width,
+                position,
+                margin_v,
+                style,
+                encoder,
+                crf,
+                preset,
+                max_bitrate,
+                width_ratio,
+            } => {
+                let mut cfg = cfg;
+                apply_overrides(&mut cfg, translator, target_language, asr);
+                let synth = build_synthesize_options(
+                    synth_mode,
+                    font,
+                    font_size,
+                    font_color,
+                    outline_color,
+                    outline_width,
+                    position,
+                    margin_v,
+                    style,
+                    encoder,
+                    crf,
+                    preset,
+                    max_bitrate,
+                    width_ratio,
+                    None,
+                    None,
+                    &cfg,
+                )?;
+                let opts = commands::process::Options {
+                    no_synthesize,
+                    no_cache,
+                    keep_intermediate,
+                    synth,
+                };
+                if !common.dry_run {
+                    gpu::prepare_for_faster_whisper(&mut cfg, config_path).await?;
+                    if !no_synthesize && uses_nvenc(&opts.synth) {
+                        gpu::prepare_for_cuda_task(&mut cfg, config_path, "NVENC GPU").await?;
+                    }
+                }
+                commands::batch::run(common, opts, &cfg, Some(config_path)).await
+            }
+        },
         Commands::Config { command } => commands::config_cmd::handle(command, config_path, &cfg),
         Commands::Model { command } => commands::model::handle(command, &cfg).await,
         Commands::Gpu { set } => gpu::handle_command(config_path, &cfg, set).await,

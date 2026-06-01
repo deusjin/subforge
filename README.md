@@ -195,6 +195,7 @@ subforge synthesize video.mp4 --subtitle video_translated.srt
 | `translate` | Transcribe and translate, without video synthesis |
 | `synthesize` | Video + SRT to hard-burned or muxed output |
 | `process` | Full pipeline: transcribe, translate, synthesize |
+| `batch` | Batch translate or process multiple videos |
 | `eval` | Subtitle quality evaluation with SubER and text metrics |
 | `setup` | Create Python venv and install sidecar dependencies |
 | `doctor` | Check ffmpeg, Python packages, CUDA, config, and sidecar sync |
@@ -202,6 +203,56 @@ subforge synthesize video.mp4 --subtitle video_translated.srt
 | `gpu` | Detect and select the default CUDA GPU |
 | `cache` | Show, prune, or clean cache entries |
 | `config` | Show, get, set, and locate configuration |
+
+## Batch Processing
+
+Use `batch translate` when you only want translated subtitle files. Use
+`batch process` when you want final videos with subtitles.
+
+Preview first:
+
+```bash
+subforge batch translate videos/ -o out --dry-run
+subforge batch process videos/ -o out --dry-run
+```
+
+Run the batch:
+
+```bash
+subforge batch translate videos/ -o out
+subforge batch process videos/ -o out --synth-mode soft
+```
+
+Common patterns:
+
+```bash
+# Process multiple explicit files
+subforge batch translate ep1.mp4 ep2.mp4 ep3.mp4 -o out
+
+# Scan subdirectories too
+subforge batch translate videos/ -o out --recursive
+
+# Run two videos at a time
+subforge batch process videos/ -o out --jobs 2
+
+# Rerun items whose final output already exists
+subforge batch process videos/ -o out --overwrite
+
+# Write a machine-readable result report
+subforge batch translate videos/ -o out --report batch-report.json
+```
+
+Batch behavior:
+
+| Rule | Behavior |
+| --- | --- |
+| Inputs | Accepts files and directories. Directory inputs scan one level by default. |
+| Recursive scan | Add `--recursive` to include nested directories. |
+| Output | Without `-o`, outputs are written next to each input video. With `-o DIR`, outputs are written under that directory. |
+| Existing outputs | Existing final outputs are skipped by default. Use `--overwrite` to rerun. |
+| Concurrency | `--jobs 1` by default. Raise it only when your GPU/API limits can handle parallel work. |
+| Translation memory | If `tm_dir` is unset, batch creates one shared `.subforge-tm` for the batch to keep terminology consistent. |
+| Failure handling | Failed items are reported, remaining items continue, and the command exits non-zero if anything failed. |
 
 ## Translation Backends
 
