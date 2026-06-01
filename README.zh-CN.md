@@ -149,6 +149,9 @@ subforge doctor
 # 转录 + 翻译（不烧制）
 subforge translate video.mp4
 
+# 批量转录 + 翻译目录中的视频，输出到 out
+subforge batch translate videos/ -o out
+
 # 转录 + 翻译 + 硬烧字幕（默认）
 subforge process video.mp4
 
