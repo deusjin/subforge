@@ -302,6 +302,7 @@ pub enum CacheCommand {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)] // Process mirrors many existing process flags; boxing would make dispatch noisier.
 pub enum BatchCommand {
     /// 批量转录 + 翻译（不烧制字幕）
     #[command(after_help = "\

@@ -666,7 +666,14 @@ mod tests {
         assert_eq!(outputs.len(), 2);
 
         touch(&outputs[0]);
-        let plan = build_plan(&[item.clone()], None, false, &opts, &Config::default()).unwrap();
+        let plan = build_plan(
+            std::slice::from_ref(&item),
+            None,
+            false,
+            &opts,
+            &Config::default(),
+        )
+        .unwrap();
         assert!(!plan.items[0].skipped);
 
         touch(&outputs[1]);
