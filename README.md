@@ -166,6 +166,12 @@ Generate translated subtitles without burning them into the video:
 subforge translate video.mp4
 ```
 
+Batch translate a folder of videos into an output directory:
+
+```bash
+subforge batch translate videos/ -o out
+```
+
 Use soft subtitle muxing instead of re-encoding the video:
 
 ```bash
