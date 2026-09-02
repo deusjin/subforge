@@ -45,3 +45,28 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: reject host-specific paths and retired repository links
+        shell: bash
+        run: |
+          set -euo pipefail
+          needles=(
+            "/""home/"
+            "/""Users/"
+            "/""Volumes/"
+            "/""mnt/"
+            "C:""/""Users/"
+            "github.com/""ti""ga"
+          )
+          windows_user_prefix="C:"
+          windows_user_prefix="${windows_user_prefix}\\"
+          windows_user_prefix="${windows_user_prefix}Users"
+          windows_user_prefix="${windows_user_prefix}\\"
+          needles+=("$windows_user_prefix")
+          while IFS= read -r commit; do
+            for needle in "${needles[@]}"; do
+              if git grep -n -I -F "$needle" "$commit" -- .; then
+                echo "Host-specific paths or retired repository links exist in Git history at $commit."
+                exit 1
+              fi
+            done
+          done < <(git rev-list --all)

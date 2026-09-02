@@ -50,7 +50,7 @@ pub fn handle(cmd: super::ConfigCommand, path: &Path, cfg: &Config) -> Result<()
                 }
             })?;
             cfg.save(path)?;
-            println!("✓ {key} = {value}");
+            println!("✓ {key} 已更新");
             Ok(())
         }
     }

@@ -71,7 +71,7 @@ pub async fn run(
             if path.exists() && !path.is_dir() {
                 return Err(format!(
                     "batch output must be a directory: {}",
-                    path.display()
+                    display_path(&path)
                 ));
             }
             Some(path)
@@ -124,7 +124,7 @@ pub async fn run(
     let pending = plan.items.iter().filter(|item| !item.skipped).count();
 
     for item in plan.items.iter().filter(|item| item.skipped) {
-        println!("skip {}", item.input.display());
+        println!("skip {}", display_path(&item.input));
         reports.push(ItemReport {
             input: display_path(&item.input),
             status: ItemStatus::Skipped,
@@ -217,7 +217,7 @@ async fn run_one(
     opts: process::Options,
     config_path: Option<PathBuf>,
 ) -> ItemReport {
-    println!("run {}", item.input.display());
+    println!("run {}", display_path(&item.input));
     let started = Instant::now();
     let result = async {
         let input = path_str(&item.input, "batch input")?;
@@ -255,7 +255,7 @@ fn discover_inputs(inputs: &[String], recursive: bool) -> Result<Vec<DiscoveredI
     for raw in inputs {
         let input = abs_path(Path::new(raw))?;
         if !input.exists() {
-            errors.push(format!("input not found: {}", input.display()));
+            errors.push(format!("input not found: {}", display_path(&input)));
             continue;
         }
 
@@ -266,7 +266,7 @@ fn discover_inputs(inputs: &[String], recursive: bool) -> Result<Vec<DiscoveredI
             } else {
                 errors.push(format!(
                     "explicit input is not a video: {}",
-                    input.display()
+                    display_path(&input)
                 ));
             }
             continue;
@@ -277,7 +277,7 @@ fn discover_inputs(inputs: &[String], recursive: bool) -> Result<Vec<DiscoveredI
             continue;
         }
 
-        errors.push(format!("unsupported input type: {}", input.display()));
+        errors.push(format!("unsupported input type: {}", display_path(&input)));
     }
 
     if !errors.is_empty() {
@@ -304,9 +304,9 @@ fn collect_dir(
     found: &mut Vec<DiscoveredInput>,
 ) -> Result<(), String> {
     let mut entries = std::fs::read_dir(dir)
-        .map_err(|e| format!("read directory {}: {e}", dir.display()))?
+        .map_err(|e| format!("read directory {}: {e}", display_path(dir)))?
         .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| format!("read directory {}: {e}", dir.display()))?;
+        .map_err(|e| format!("read directory {}: {e}", display_path(dir)))?;
     entries.sort_by_key(|entry| entry.path());
 
     for entry in entries {
@@ -342,9 +342,9 @@ fn build_plan(
             if let Some(previous) = seen_outputs.insert(key, input.path.clone()) {
                 return Err(format!(
                     "output collision: {} would be written by both {} and {}",
-                    output.display(),
-                    previous.display(),
-                    input.path.display()
+                    display_path(output),
+                    display_path(&previous),
+                    display_path(&input.path)
                 ));
             }
         }
@@ -442,7 +442,7 @@ fn common_root(inputs: &[DiscoveredInput]) -> PathBuf {
 
 fn print_dry_run(plan: &BatchPlan) {
     if let Some(tm_dir) = &plan.tm_dir {
-        println!("TM: {}", tm_dir.display());
+        println!("TM: {}", display_path(tm_dir));
     }
     if plan.items.is_empty() {
         println!("No videos found.");
@@ -450,9 +450,9 @@ fn print_dry_run(plan: &BatchPlan) {
     }
     for item in &plan.items {
         let action = if item.skipped { "SKIP" } else { "RUN" };
-        println!("{action} {}", item.input.display());
+        println!("{action} {}", display_path(&item.input));
         for output in &item.outputs {
-            println!("  -> {}", output.display());
+            println!("  -> {}", display_path(output));
         }
     }
 }
@@ -512,10 +512,10 @@ fn write_report(path: &Path, report: &BatchReport) -> Result<(), String> {
         && !parent.as_os_str().is_empty()
     {
         std::fs::create_dir_all(parent)
-            .map_err(|e| format!("create report dir {}: {e}", parent.display()))?;
+            .map_err(|e| format!("create report dir {}: {e}", display_path(parent)))?;
     }
     let json = serde_json::to_string_pretty(report).map_err(|e| format!("encode report: {e}"))?;
-    std::fs::write(path, json).map_err(|e| format!("write report {}: {e}", path.display()))
+    std::fs::write(path, json).map_err(|e| format!("write report {}: {e}", display_path(path)))
 }
 
 fn merge_outputs(predicted: &[PathBuf], actual: PathBuf) -> Vec<String> {
@@ -529,11 +529,28 @@ fn merge_outputs(predicted: &[PathBuf], actual: PathBuf) -> Vec<String> {
 
 fn path_str<'a>(path: &'a Path, label: &str) -> Result<&'a str, String> {
     path.to_str()
-        .ok_or_else(|| format!("{label} path is not valid UTF-8: {}", path.display()))
+        .ok_or_else(|| format!("{label} path is not valid UTF-8: {}", display_path(path)))
 }
 
 fn display_path(path: &Path) -> String {
-    path.to_string_lossy().into_owned()
+    if !path.is_absolute() {
+        return path.to_string_lossy().into_owned();
+    }
+
+    if let Ok(cwd) = std::env::current_dir()
+        && let Ok(relative) = path.strip_prefix(cwd)
+    {
+        return if relative.as_os_str().is_empty() {
+            ".".into()
+        } else {
+            relative.to_string_lossy().into_owned()
+        };
+    }
+
+    // Absolute paths outside the current project can contain usernames,
+    // dataset names, and other host-specific details. Keep them opaque in
+    // logs and JSON reports; the real path is still used internally.
+    "<external-path>".into()
 }
 
 fn abs_path(path: &Path) -> Result<PathBuf, String> {
@@ -716,5 +733,18 @@ mod tests {
         let json = serde_json::to_string(&report).unwrap();
         assert!(json.contains("\"status\":\"success\""));
         assert!(json.contains("\"succeeded\":1"));
+    }
+
+    #[test]
+    fn display_path_hides_external_absolute_paths() {
+        let external = std::env::temp_dir()
+            .join("subforge-privacy-test")
+            .join("video.mp4");
+        let Ok(cwd) = std::env::current_dir() else {
+            return;
+        };
+        if external.is_absolute() && external.strip_prefix(cwd).is_err() {
+            assert_eq!(display_path(&external), "<external-path>");
+        }
     }
 }

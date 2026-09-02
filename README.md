@@ -452,6 +452,7 @@ subforge config path
 ```
 
 `subforge config get api_key` only prints a redacted prefix.
+`subforge config set` confirms the key was updated without echoing its value.
 
 ## Translation Memory
 

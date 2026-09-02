@@ -351,6 +351,8 @@ subforge config get api_key                       # 仅显示前 4 位
 subforge config path                              # 显示实际加载的 config.toml 位置
 ```
 
+`config set` 只确认配置项已更新，不会回显密钥值；`config get` 对密钥只显示脱敏前缀。
+
 ### 模型管理 / 缓存管理
 
 ```bash
